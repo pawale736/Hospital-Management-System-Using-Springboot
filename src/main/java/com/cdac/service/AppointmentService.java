@@ -54,8 +54,18 @@ public class AppointmentService {
 		}
 	}
 	
-	public Object[] getAppointmentDetails(int appointmentId) {
-        return appointmentRepository.findAppointmentDetails(appointmentId);
+	public Object[] getAppointmentDetails(int appointmentId)throws AppointmentServiceException {
+        Object []appointment= appointmentRepository.findAppointmentDetails(appointmentId);
+        
+        if(appointment.length!=0)
+        {
+        	return appointment;
+        }
+        else
+        {
+        	throw new AppointmentServiceException("Enter appropriate appointment id");
+        }
+        
     }
 	
 	public List<Object[]> getAllAppointmentDetails() {
@@ -63,32 +73,15 @@ public class AppointmentService {
     }
 	
 	 public void updateAppointment(int appointmentId, Doctor doctor, Patient patient, LocalDate appointmentDate, LocalTime appointmentTime) {
-	        appointmentRepository.updateAppointmentDetails(appointmentId, doctor, patient, appointmentDate, appointmentTime);
+	        
+		 appointmentRepository.updateAppointmentDetails(appointmentId, doctor, patient, appointmentDate, appointmentTime);
 	    }
-	 
-	 public void update(Appointment appointment) {
-		    int appointmentId = appointment.getAppointmentId();
-		    Optional<Appointment> existingAppointmentOptional = appointmentRepository.findById(appointmentId);
-		    
-		    if (existingAppointmentOptional.isPresent()) {
-		        Appointment existingAppointment = existingAppointmentOptional.get();
-		        
-		        // Update the fields of the existing appointment with the new values
-		        existingAppointment.setAppointmentDate(appointment.getAppointmentDate());
-		        existingAppointment.setAppointmentTime(appointment.getAppointmentTime());
-		        
-		        // Save the updated appointment
-		        appointmentRepository.save(existingAppointment);
-		    } else {
-		        throw new AppointmentServiceException("Appointment not found with ID: " + appointmentId);
-		    }
-		}
 
 
 
-	public boolean delete(int id) {
+	public boolean delete(int id) throws AppointmentServiceException {
 		Optional<Appointment> appointment1= appointmentRepository.findById(id);
-		if(appointment1!=null) {
+		if(appointment1.isPresent()) {
 			appointmentRepository.delete(appointment1.get());
 		     return true;}
 		else {

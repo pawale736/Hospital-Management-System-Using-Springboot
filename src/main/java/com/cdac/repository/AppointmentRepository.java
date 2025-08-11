@@ -15,12 +15,6 @@ import com.cdac.entity.Patient;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
 	
-	/*
-	 * public Optional<Appointment> findById(int id);
-	 * 
-	 * @Query("SELECT a FROM Appointment a JOIN FETCH a.patient JOIN FETCH a.doctor"
-	 * ) List<Appointment> findAll();
-	 */
 	
 	@Query("SELECT a.appointmentId, p, d FROM Appointment a JOIN a.patient p JOIN a.doctor d WHERE a.appointmentId = :appointmentId")
     Object[] findAppointmentDetails(int appointmentId);

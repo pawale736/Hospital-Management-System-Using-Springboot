@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cdac.dto.AppointmentUpdateRequest;
+import com.cdac.dto.FetchingAppointmentStatus;
+import com.cdac.dto.FetchingPatientStatus;
 import com.cdac.dto.RegistrationStatus;
 import com.cdac.dto.Status;
 import com.cdac.entity.Appointment;
@@ -26,7 +30,7 @@ import com.cdac.service.AppointmentService;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class AppointmentController {
-	
+
 	@Autowired
 	private AppointmentService appointmentService;
 
@@ -39,38 +43,44 @@ public class AppointmentController {
 			status.setMessageIfAny("Appointment successful!");
 			status.setId(id);
 			return status;
-		}
-		catch(AppointmentServiceException e) {
+		} catch (AppointmentServiceException e) {
 			Status status = new Status();
 			status.setStatus(false);
 			status.setMessageIfAny(e.getMessage());
 			return status;
 		}
 	}
-	
+
 	@GetMapping("/fetchAppointment/{id}")
-	public Object[] fetchById(@PathVariable int id) {
-			return appointmentService.getAppointmentDetails(id);
+	public FetchingAppointmentStatus fetchById(@PathVariable int id) {
+		try {
+			Object appointment[] = appointmentService.getAppointmentDetails(id);
+			FetchingAppointmentStatus a = new FetchingAppointmentStatus();
+			a.setAppointment(appointment);
+			return a;
+		} catch (AppointmentServiceException e) {
+			FetchingAppointmentStatus a = new FetchingAppointmentStatus();
+			a.setMessageIfAny(e.getMessage());
+			return a;
+		}
 	}
-	
+
 	@GetMapping("/fetchAllAppointments")
-	public List<Object[]> fetch(){
-		List<Object[]> appointments =appointmentService.getAllAppointmentDetails();
+	public List<Object[]> fetch() {
+		List<Object[]> appointments = appointmentService.getAllAppointmentDetails();
 		return appointments;
 	}
-	
-	
-	
-	@PostMapping("/deleteAppointment/{id}")
+
+	@DeleteMapping("/deleteAppointment/{id}")
 	public Status delete(@PathVariable int id) {
-		
+
 		try {
 			appointmentService.delete(id);
 			Status status = new Status();
 			status.setStatus(true);
 			status.setMessageIfAny("Appointment Deleted!");
 			return status;
-		} catch (PatientServiceException e) {
+		} catch (AppointmentServiceException e) {
 			Status status = new Status();
 			status.setStatus(false);
 			status.setMessageIfAny(e.getMessage());
@@ -78,23 +88,25 @@ public class AppointmentController {
 
 		}
 	}
-	
-//	@PutMapping("/appointments/update")
-//    public void updateAppointment(@RequestParam int appointmentId, @RequestBody Doctor doctor,
-//                                  @RequestBody Patient patient, @RequestParam LocalDate appointmentDate) {
-//        appointmentService.updateAppointment(appointmentId, doctor, patient, appointmentDate);
-//    }
-	
-	 @PutMapping("/appointments/update/{appointmentId}")
-	    public void updateAppointment(@PathVariable int appointmentId, 
-	    		@RequestBody LocalDate appointmentDate,
-	                                                    @RequestBody LocalTime appointmentTime,
-	                                                    @RequestBody Doctor doctor,
-	                                                    @RequestBody Patient patient) {
-	        appointmentService.updateAppointment(appointmentId, doctor, patient, appointmentDate, appointmentTime);
-	        
-	    }
-	
-	
+
+	@PutMapping("/update/{appointmentId}")
+	public Status updateAppointment(@PathVariable int appointmentId,
+			@RequestBody AppointmentUpdateRequest updateRequest) {
+		try {
+			appointmentService.updateAppointment(appointmentId, updateRequest.getDoctor(), updateRequest.getPatient(),
+					updateRequest.getAppointmentDate(), updateRequest.getAppointmentTime());
+			Status status = new Status();
+			status.setStatus(true);
+			status.setMessageIfAny("Appointment Successfully Updated");
+			return status;
+		
+			
+		} catch (AppointmentServiceException  e) {
+			Status status = new Status();
+			status.setStatus(false);
+			status.setMessageIfAny(e.getMessage());
+			return status;
+		}
+		}
 
 }

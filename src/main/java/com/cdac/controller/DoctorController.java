@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,11 +12,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cdac.dto.DoctorLoginStatus;
+import com.cdac.dto.FetchingDoctorStatus;
+import com.cdac.dto.FetchingPatientStatus;
 import com.cdac.dto.LoginDetails;
 import com.cdac.dto.LoginStatus;
 import com.cdac.dto.RegistrationStatus;
 import com.cdac.dto.Status;
 import com.cdac.entity.Doctor;
+import com.cdac.entity.Patient;
 import com.cdac.exception.DoctorServiceException;
 import com.cdac.exception.PatientServiceException;
 import com.cdac.service.DoctorService;
@@ -50,7 +55,7 @@ public class DoctorController {
 	public Status login(@RequestBody LoginDetails loginDetails) {
 		try {
 			Doctor doctor = doctorService.login(loginDetails.getEmail(), loginDetails.getPassword());
-			LoginStatus status = new LoginStatus();
+			DoctorLoginStatus status = new DoctorLoginStatus();
 			status.setStatus(true);
 			status.setMessageIfAny("Login successful!");
 			status.setDoctorId(doctor.getId());
@@ -65,23 +70,32 @@ public class DoctorController {
 	}
 	
 	@GetMapping("/fetchDoctor/{id}")
-	public Doctor fetchById(@PathVariable int id) {
-			return doctorService.fetchById(id);
+	public FetchingDoctorStatus fetchById(@PathVariable int id) {
+			try {
+				Doctor doctor= doctorService.fetchById(id);
+				FetchingDoctorStatus d = new FetchingDoctorStatus();
+				d.setDoctor(doctor);
+				return d;
+			} catch (DoctorServiceException e) {
+				FetchingDoctorStatus d1 = new FetchingDoctorStatus();
+				d1.setMessageIfAny(e.getMessage());
+				return d1;
+			}
 	}
 	
 	@PostMapping("/fetchDoctorByName")
 	public int fetchByName(@RequestBody Doctor doctor) {
-			return doctorService.fetchByName(doctor);
+			return doctorService.fetchByName(doctor);		
 	}
 	
 	
-	@PostMapping("/fetchDoctors")
+	@GetMapping("/fetchDoctors")
 	public List<Doctor> fetch(){
 		List<Doctor> doctors =doctorService.fetch();
 		return doctors;
 	}
 	
-	@PostMapping("/deleteDoctor/{id}")
+	@DeleteMapping("/deleteDoctor/{id}")
 	public Status delete(@PathVariable int id) {
 		
 		try {
@@ -101,8 +115,20 @@ public class DoctorController {
 	
 	
 	@PutMapping("/updateDoctor/{id}")
-	public void update(@PathVariable int id,@RequestBody Doctor doctor) {
-			doctorService.update(id,doctor);
+	public Status update(@PathVariable int id,@RequestBody Doctor doctor) {
+			try {
+				doctorService.update(id,doctor);
+				Status status = new Status();
+				status.setStatus(true);
+				status.setMessageIfAny("Doctor Updated successfully");
+				return status;
+			} catch (DoctorServiceException e) {
+				Status status = new Status();
+				status.setStatus(false);
+				status.setMessageIfAny(e.getMessage());
+				return status;
+
+			}
 			
 		
 	}

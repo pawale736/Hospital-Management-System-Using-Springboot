@@ -25,8 +25,6 @@ public class Appointment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     private int appointmentId;
 
-	
-
 	@JsonBackReference("docap")
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "doctor_id")

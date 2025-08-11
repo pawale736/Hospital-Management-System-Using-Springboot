@@ -16,6 +16,7 @@ import com.cdac.dto.FetchingAllPatientStatus;
 import com.cdac.dto.FetchingPatientStatus;
 import com.cdac.dto.LoginDetails;
 import com.cdac.dto.LoginStatus;
+import com.cdac.dto.PatientLoginStatus;
 import com.cdac.dto.RegistrationStatus;
 import com.cdac.dto.Status;
 import com.cdac.entity.Patient;
@@ -67,7 +68,7 @@ public class PatientController {
 	public Status login(@RequestBody LoginDetails loginDetails) {
 		try {
 			Patient patient = patientService.login(loginDetails.getEmail(), loginDetails.getPassword());
-			LoginStatus status = new LoginStatus();
+			PatientLoginStatus status = new PatientLoginStatus();
 			status.setStatus(true);
 			status.setMessageIfAny("Login successful!");
 			status.setPatientId(patient.getId());

@@ -4,6 +4,8 @@ public class LoginStatus extends Status {
 
 	private int patientId;
 	private int doctorId;
+	
+	
 	public int getDoctorId() {
 		return doctorId;
 	}
